@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: tron-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    env_file: .env
+  app:
+    build: .
+    container_name: tron-app
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    volumes:
+    - ./:/app
+    working_dir: /app
+    command: ["uvicorn", "--factory", "src.main:create_app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+volumes:
+  postgres_data:
